@@ -1,0 +1,169 @@
+{
+  "services": [
+    {
+      "id": "vod-review",
+      "title": "VOD Review",
+      "subtitle": "Expert breakdown of your gameplay",
+      "price": 12,
+      "originalPrice": 15,
+      "duration": "30-45 mins",
+      "type": "individual",
+      "popular": false,
+      "features": [
+        "Expert breakdown of your gameplay",
+        "Spot hidden mistakes pros notice instantly",
+        "Clear action steps for your next ranked match",
+        "Budget-friendly way to test coaching before committing"
+      ],
+      "description": "Get a detailed analysis of your recorded gameplay with timestamped feedback and personalized improvement plans.",
+      "stripeProductId": "prod_vod_review",
+      "stripePriceId": "price_vod_review"
+    },
+    {
+      "id": "intro-coaching",
+      "title": "Intro Coaching Session",
+      "subtitle": "Live 1-on-1 session with personalized advice",
+      "price": 20,
+      "originalPrice": 25,
+      "duration": "1 hour",
+      "type": "individual",
+      "popular": false,
+      "features": [
+        "Live 1-on-1 session with personalized advice",
+        "Learn smarter crosshair placement, angles, and peeks",
+        "Map awareness drills so you stop \"dying for free\"",
+        "Perfect for Gold–Plat players stuck in a cycle"
+      ],
+      "description": "Perfect introduction to coaching with a focused 1-hour session covering fundamentals and personalized feedback.",
+      "stripeProductId": "prod_intro_coaching",
+      "stripePriceId": "price_intro_coaching"
+    },
+    {
+      "id": "standard-coaching",
+      "title": "Standard Coaching",
+      "subtitle": "2 hours of focused live coaching",
+      "price": 35,
+      "originalPrice": 40,
+      "duration": "2 hours",
+      "type": "individual",
+      "popular": true,
+      "features": [
+        "2 hours of focused live coaching (aim, utility, rotations)",
+        "Written improvement plan to track your growth",
+        "Identify your personal \"rank blockers\"",
+        "Great for players serious about hitting Diamond–Immortal"
+      ],
+      "description": "Comprehensive coaching session with extended time for deep dives into specific areas and written improvement plans.",
+      "stripeProductId": "prod_standard_coaching",
+      "stripePriceId": "price_standard_coaching"
+    },
+    {
+      "id": "duo-queue",
+      "title": "Duo Queue Coaching",
+      "subtitle": "Play ranked with me guiding every decision",
+      "price": 18,
+      "originalPrice": 20,
+      "duration": "per game",
+      "type": "individual",
+      "popular": false,
+      "features": [
+        "Play ranked with me guiding every decision",
+        "Real-time callouts, rotations, and clutch mindset coaching",
+        "Learn from live comms — not just theory",
+        "Ideal if you want improvement and rank gains at the same time"
+      ],
+      "description": "Learn while climbing! Play ranked games together with live coaching and real-time feedback on every decision.",
+      "stripeProductId": "prod_duo_queue",
+      "stripePriceId": "price_duo_queue"
+    },
+    {
+      "id": "weekly-program",
+      "title": "Weekly Coaching Program",
+      "subtitle": "Structured weekly improvement program",
+      "price": 70,
+      "originalPrice": 85,
+      "duration": "per week",
+      "type": "package",
+      "popular": false,
+      "features": [
+        "2x live 1hr sessions (deep dives per week)",
+        "1x VOD review included for extra analysis",
+        "Custom training plan (aim routines, utility lineups, mental prep)",
+        "Accountability – I track your progress, not just leave you guessing"
+      ],
+      "description": "Structured weekly program with multiple sessions, VOD reviews, and custom training plans for consistent improvement.",
+      "stripeProductId": "prod_weekly_program",
+      "stripePriceId": "price_weekly_program"
+    },
+    {
+      "id": "rank-accelerator",
+      "title": "Rank Accelerator Bootcamp",
+      "subtitle": "5-6 duo sessions designed for fast climbing",
+      "price": 120,
+      "originalPrice": 150,
+      "duration": "5-6 sessions",
+      "type": "package",
+      "popular": true,
+      "features": [
+        "5–6 duo sessions designed for fast climbing",
+        "Tailored feedback after each game",
+        "Drills + mental coaching to handle pressure games",
+        "Climb faster while learning the skills to STAY there",
+        "Most cost-effective if you're serious about Immortal+"
+      ],
+      "description": "Intensive bootcamp designed for serious players who want to accelerate their rank progression with focused duo sessions.",
+      "stripeProductId": "prod_rank_accelerator",
+      "stripePriceId": "price_rank_accelerator"
+    }
+  ],
+  "bundles": [
+    {
+      "id": "vod-bundle",
+      "title": "VOD Review Bundle",
+      "subtitle": "3 VOD reviews for the price of 2.5",
+      "price": 30,
+      "originalPrice": 36,
+      "savings": 6,
+      "services": ["vod-review", "vod-review", "vod-review"],
+      "description": "Perfect for players who want multiple VOD reviews to track their improvement over time.",
+      "stripeProductId": "prod_vod_bundle",
+      "stripePriceId": "price_vod_bundle"
+    },
+    {
+      "id": "duo-bundle",
+      "title": "Duo Queue Bundle",
+      "subtitle": "3 duo sessions for the price of 2.5",
+      "price": 45,
+      "originalPrice": 54,
+      "savings": 9,
+      "services": ["duo-queue", "duo-queue", "duo-queue"],
+      "description": "Great value for players who want to learn through multiple duo sessions.",
+      "stripeProductId": "prod_duo_bundle",
+      "stripePriceId": "price_duo_bundle"
+    },
+    {
+      "id": "mega-duo-bundle",
+      "title": "Mega Duo Bundle",
+      "subtitle": "10 duo sessions for maximum value",
+      "price": 130,
+      "originalPrice": 180,
+      "savings": 50,
+      "services": ["duo-queue", "duo-queue", "duo-queue", "duo-queue", "duo-queue", "duo-queue", "duo-queue", "duo-queue", "duo-queue", "duo-queue"],
+      "description": "Best value for serious players committed to long-term improvement through duo coaching.",
+      "stripeProductId": "prod_mega_duo_bundle",
+      "stripePriceId": "price_mega_duo_bundle"
+    }
+  ],
+  "categories": [
+    {
+      "id": "individual",
+      "name": "Individual Sessions",
+      "description": "One-time coaching sessions for specific needs"
+    },
+    {
+      "id": "package",
+      "name": "Coaching Packages",
+      "description": "Structured programs for consistent improvement"
+    }
+  ]
+}

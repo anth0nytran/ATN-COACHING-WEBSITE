@@ -1,0 +1,26 @@
+[
+  {
+    "type": "image",
+    "src": "/public/credentials/600_peak_rr_radiant.png",
+    "alt": "Peak Radiant rank snapshot"
+  },
+  {
+    "type": "image",
+    "src": "/public/credentials/Rank_History_3x_Radiant.png",
+    "alt": "Rank history with multiple Radiant acts"
+  },
+  {
+    "type": "image",
+    "src": "/public/credentials/Lifetime Average Stats.png",
+    "alt": "Lifetime average stats"
+  },
+  {
+    "type": "image",
+    "src": "/public/credentials/top agents.png",
+    "alt": "Top agents played"
+  },
+  {
+    "type": "tiktok",
+    "src": "https://www.tiktok.com/@anthobeamer/video/7242167077925063982?lang=en"
+  }
+]
