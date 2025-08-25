@@ -13,11 +13,11 @@ interface RevealProps {
 }
 
 export default function Reveal({ children, as = "div", className, staggerDelayMs = 0, style }: RevealProps) {
-	const ref = useRef<HTMLElement | null>(null as any);
+	const ref = useRef<HTMLElement | null>(null);
 	const [visible, setVisible] = useState(false);
 
 	useEffect(() => {
-		const el = ref.current as unknown as Element | null;
+		const el = ref.current;
 		if (!el) return;
 		const obs = new IntersectionObserver(
 			(entries) => {
@@ -33,10 +33,10 @@ export default function Reveal({ children, as = "div", className, staggerDelayMs
 		return () => obs.disconnect();
 	}, [staggerDelayMs]);
 
-	const Tag = as as any;
+	const Tag = as as unknown as React.ElementType;
 	return (
 		<Tag
-			ref={ref as any}
+			ref={ref}
 			className={className}
 			style={{
 				opacity: visible ? 1 : 0,

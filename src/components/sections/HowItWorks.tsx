@@ -84,7 +84,7 @@ export function HowItWorks() {
         </div>
 
         {/* What You&apos;ll Learn */}
-        <Reveal className="bg-gray-800 rounded-2xl p-8 md:p-12 mb-16" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" } as any}>
+        <Reveal className="bg-gray-800 rounded-2xl p-8 md:p-12 mb-16" style={{ border: "1px solid rgba(239, 68, 68, 0.2)" }}>
           <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">
             What You&apos;ll <span className="text-gradient">Learn</span>
           </h3>
