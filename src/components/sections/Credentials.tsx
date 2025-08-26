@@ -275,8 +275,22 @@ export function Credentials() {
           <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">Ready to Work with a <span className="text-gradient">Proven Coach?</span></h3>
           <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">My credentials speak for themselves. Now let&apos;s work on yours. Book a session and start your journey to the next rank.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button variant="valorant" size="xl" className="valorant-button">Book Your Session</Button>
-            <Button variant="valorant-outline" size="xl" className="valorant-button-outline">See How It Works</Button>
+            <Button
+              variant="valorant"
+              size="xl"
+              className="valorant-button"
+              onClick={() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Book Your Session
+            </Button>
+            <Button
+              variant="valorant-outline"
+              size="xl"
+              className="valorant-button-outline"
+              onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              See How It Works
+            </Button>
           </div>
         </Reveal>
       </div>
