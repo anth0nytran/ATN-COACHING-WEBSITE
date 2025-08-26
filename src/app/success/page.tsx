@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 
@@ -11,7 +11,7 @@ type ConfirmResponse = {
   metadata?: { serviceId?: string };
 };
 
-export default function SuccessPage() {
+function SuccessInner() {
   const params = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [ok, setOk] = useState(false);
@@ -147,6 +147,14 @@ export default function SuccessPage() {
         )}
       </div>
     </section>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<section className="section-padding"><div className="container-max text-center text-white">Loading…</div></section>}>
+      <SuccessInner />
+    </Suspense>
   );
 }
 
