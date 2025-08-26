@@ -2,8 +2,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Video, Users, Target, CheckCircle, ArrowRight } from "lucide-react";
+import { Card, CardDescription, CardHeader } from "@/components/ui/card";
+import { Calendar, Video, Users, Target, CheckCircle } from "lucide-react";
 import Reveal from "./Reveal";
 
 export function HowItWorks() {
@@ -57,28 +57,20 @@ export function HowItWorks() {
         {/* Steps */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-16">
           {steps.map((step, index) => (
-            <Reveal key={index} staggerDelayMs={index * 70} className="relative">
+            <Reveal key={index} staggerDelayMs={index * 70} className="relative overflow-hidden">
               <Card className="valorant-card text-center h-full">
                 <CardHeader>
                   <div className={`${step.color} mb-4 flex justify-center`}>
                     <step.icon className="w-12 h-12" />
                   </div>
-                  <CardTitle className="text-xl text-white mb-2">
+                  <div className="text-xl text-white mb-2 font-semibold">
                     {step.title}
-                  </CardTitle>
+                  </div>
                   <CardDescription className="text-gray-300">
                     {step.description}
                   </CardDescription>
                 </CardHeader>
               </Card>
-              
-              {/* Arrow connector */}
-              {index < steps.length - 1 && (
-                <div className="hidden lg:flex items-center pointer-events-none absolute top-1/2 -translate-y-1/2 right-[-0.75rem] z-10">
-                  <div className="h-px w-12 bg-gray-700" />
-                  <ArrowRight className="ml-2 w-4 h-4 text-gray-500" />
-                </div>
-              )}
             </Reveal>
           ))}
         </div>
@@ -157,7 +149,6 @@ export function HowItWorks() {
             onClick={() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })}
           >
             Book Your First Session
-            <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
         </Reveal>
       </div>

@@ -27,8 +27,8 @@ Thumbs.db
 # Vercel / deployment
 .vercel/
 
-# Large local assets
-public/videos/
+# Large local assets (allow videos to be deployed)
+# public/videos/
 
 # MCP config (may contain API keys)
 mcp.json

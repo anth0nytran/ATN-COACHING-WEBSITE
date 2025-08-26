@@ -1,0 +1,53 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
+export default function CheckoutAutoPage() {
+  const params = useSearchParams();
+  const [error, setError] = useState<string | null>(null);
+  const serviceId = params.get("serviceId");
+  const bypass = params.get("bypass");
+
+  useEffect(() => {
+    if (!serviceId) {
+      setError("Missing serviceId");
+      return;
+    }
+    (async () => {
+      try {
+        const url = bypass ? `/api/checkout?bypass=${encodeURIComponent(bypass)}` : "/api/checkout";
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ serviceId, bypass }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data?.url) {
+          window.location.href = data.url as string;
+        } else {
+          setError((data?.error as string) || "Failed to create checkout session");
+        }
+      } catch (e) {
+        setError("Failed to create checkout session");
+      }
+    })();
+  }, [serviceId]);
+
+  return (
+    <section className="section-padding">
+      <div className="container-max text-center text-white">
+        {!error ? (
+          <div>Preparing checkout…</div>
+        ) : (
+          <div>
+            <div className="mb-4">{error}</div>
+            <a className="valorant-button" href="/#services">Back to Services</a>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+

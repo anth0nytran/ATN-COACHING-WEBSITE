@@ -82,8 +82,18 @@ const tooltipByService: Record<string, string[]> = {
 };
 
 export function Services() {
-  const handleBookService = (serviceId: string) => {
-    console.log(`Booking service: ${serviceId}`);
+  const handleBookService = async (serviceId: string) => {
+    try {
+      const hasSession = document.cookie.split(";").some((c) => c.trim().startsWith("sid="));
+      if (!hasSession) {
+        const returnTo = encodeURIComponent(`/checkout-auto?serviceId=${encodeURIComponent(serviceId)}${process.env.NODE_ENV !== "production" ? "&bypass=1" : ""}`);
+        window.location.href = `/api/auth/login?returnTo=${returnTo}`;
+        return;
+      }
+      window.location.href = `/checkout-auto?serviceId=${encodeURIComponent(serviceId)}${process.env.NODE_ENV !== "production" ? "&bypass=1" : ""}`;
+    } catch (e) {
+      // no-op UI for now
+    }
   };
 
   const handleJoinDiscord = () => {
