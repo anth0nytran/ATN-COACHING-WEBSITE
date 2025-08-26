@@ -2,27 +2,25 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Calendar, MessageCircle, ArrowRight, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
-type ConfirmResponse = { ok: boolean; customer?: { email?: string; name?: string } };
+type ConfirmResponse = {
+  ok: boolean;
+  customer?: { email?: string; name?: string };
+  orderNumber?: string;
+  metadata?: { serviceId?: string };
+};
 
 export default function SuccessPage() {
   const params = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [ok, setOk] = useState(false);
   const [email, setEmail] = useState<string | undefined>();
-  const [name, setName] = useState<string | undefined>();
   const [orderNumber, setOrderNumber] = useState<string | undefined>();
   const [serviceId, setServiceId] = useState<string | undefined>();
-  const [discordId, setDiscordId] = useState<string | undefined>();
   // Simplified: no scheduling detection or membership polling
 
   useEffect(() => {
-    fetch("/api/session")
-      .then((r) => r.json())
-      .then((s) => setDiscordId(s?.discordId || undefined))
-      .catch(() => undefined);
-
     const id = params.get("session_id");
     if (!id) {
       setLoading(false);
@@ -33,10 +31,9 @@ export default function SuccessPage() {
     const svc = sid ? `&serviceId=${encodeURIComponent(sid)}` : "";
     fetch(`/api/checkout/confirm?session_id=${encodeURIComponent(id)}${bypass}${svc}`)
       .then((r) => r.json())
-      .then((data: any) => {
+      .then((data: ConfirmResponse) => {
         setOk(Boolean(data?.ok));
         setEmail(data?.customer?.email);
-        setName(data?.customer?.name);
         setServiceId(data?.metadata?.serviceId || sid || undefined);
         setOrderNumber(data?.orderNumber);
       })

@@ -97,7 +97,8 @@ export function Services() {
   };
 
   const handleJoinDiscord = () => {
-    window.open("https://discord.gg/your-invite", "_blank");
+    const invite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "https://discord.com";
+    window.open(invite, "_blank");
   };
 
   const iconForService = (id: string) => {
