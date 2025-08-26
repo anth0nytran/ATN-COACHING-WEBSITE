@@ -43,12 +43,14 @@ export async function POST(req: NextRequest) {
       const metadata = session.metadata || {};
       const discordId = metadata.discordId as string | undefined;
       const serviceId = metadata.serviceId as string | undefined;
+      const isBundle = serviceId ? ["vod-bundle", "duo-bundle", "mega-duo-bundle"].includes(serviceId) : false;
       const dateBooked = session.created ? new Date(session.created * 1000).toISOString() : undefined;
       if (discordId) await assignRole(discordId);
       await notifyOwner(
         `Payment confirmed\n` +
         `• Student: ${metadata.username || metadata.name || "(unknown)"} (${discordId || "no-discord"})\n` +
         `• Service: ${serviceId || "?"}\n` +
+        (!isBundle && metadata.calendlyUrl ? `• Calendly: ${metadata.calendlyUrl}\n` : "") +
         (metadata.email ? `• Email: ${metadata.email}\n` : "") +
         (dateBooked ? `• Paid at: ${dateBooked}\n` : "")
       );

@@ -71,7 +71,16 @@ function SuccessInner() {
   if (loading) return <div className="section-padding"><div className="container-max text-center text-white">Verifying payment…</div></div>;
   if (!ok) return <div className="section-padding"><div className="container-max text-center text-white">Payment not verified. If you were charged, contact support.</div></div>;
 
-  const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || "";
+  const nonSchedulable = new Set(["vod-bundle", "duo-bundle", "mega-duo-bundle"]);
+
+  function getCalendlyUrlFor(id?: string): string {
+    const env = process.env as Record<string, string | undefined>;
+    if (!id) return env.NEXT_PUBLIC_CALENDLY_URL || "";
+    if (nonSchedulable.has(id)) return ""; // bundles skip Calendly entirely
+    const key = `NEXT_PUBLIC_CALENDLY_URL_${id.replace(/[^a-z0-9]+/gi, "_").toUpperCase()}`;
+    return env[key] || env.NEXT_PUBLIC_CALENDLY_URL || "";
+  }
+  const calendlyUrl = getCalendlyUrlFor(serviceId);
   const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "";
 
   return (
@@ -136,7 +145,7 @@ function SuccessInner() {
                 </div>
               </div>
             ) : (
-              <div className="card-surface p-8 text-center text-gray-300">Calendly link not configured.</div>
+              <div className="card-surface p-8 text-center text-gray-300">No scheduling required for this purchase. Check your email and join Discord.</div>
             )}
           </div>
         </div>

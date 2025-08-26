@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import crypto from "node:crypto";
 import { readSession } from "@/lib/session";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY as string | undefined;
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL as string | undefined;
 const priceMapJson = process.env.STRIPE_PRICE_MAP as string | undefined;
+function getCalendlyUrlFor(serviceId: string): string | undefined {
+  const key = `NEXT_PUBLIC_CALENDLY_URL_${serviceId.replace(/[^a-z0-9]+/gi, "_").toUpperCase()}`;
+  return process.env[key];
+}
 const checkoutBypass = (process.env.CHECKOUT_BYPASS || "").toLowerCase() === "1" || (process.env.CHECKOUT_BYPASS || "").toLowerCase() === "true";
 
 export async function POST(req: NextRequest) {
@@ -36,6 +41,11 @@ export async function POST(req: NextRequest) {
     if (!priceId) return NextResponse.json({ error: "Unknown serviceId" }, { status: 400 });
 
     const sess = await readSession();
+    const idKey = crypto
+      .createHash("sha256")
+      .update(`${serviceId}:${sess?.discordId || "anon"}`)
+      .digest("hex");
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -47,10 +57,16 @@ export async function POST(req: NextRequest) {
         },
       ],
       customer_email: email,
-      metadata: { serviceId, name: name || "", discordId: sess?.discordId || "", username: sess?.username || "" },
+      metadata: {
+        serviceId,
+        name: name || "",
+        discordId: sess?.discordId || "",
+        username: sess?.username || "",
+        calendlyUrl: getCalendlyUrlFor(serviceId) || "",
+      },
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/#services`,
-    });
+    }, { idempotencyKey: idKey });
 
     return NextResponse.json({ url: session.url });
   } catch (err: unknown) {
