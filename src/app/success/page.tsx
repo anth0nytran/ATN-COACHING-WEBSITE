@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 
 type ConfirmResponse = {
@@ -13,11 +13,13 @@ type ConfirmResponse = {
 
 function SuccessInner() {
   const params = useSearchParams();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [ok, setOk] = useState(false);
   const [email, setEmail] = useState<string | undefined>();
   const [orderNumber, setOrderNumber] = useState<string | undefined>();
   const [serviceId, setServiceId] = useState<string | undefined>();
+  const [redirecting, setRedirecting] = useState(false);
   // Simplified: no scheduling detection or membership polling
 
   useEffect(() => {
@@ -41,6 +43,32 @@ function SuccessInner() {
   }, [params]);
 
   // No-op effects removed
+
+  // After Calendly schedules, immediately redirect to home.
+  useEffect(() => {
+    const key = `scheduled:${serviceId || "any"}`;
+    if (typeof window !== "undefined") {
+      // If they've already scheduled (e.g., after refresh), send them home
+      if (sessionStorage.getItem(key) === "1") {
+        setRedirecting(true);
+        setTimeout(() => router.replace("/"), 600);
+        return;
+      }
+      const onMsg = (ev: MessageEvent) => {
+        try {
+          if (typeof ev.data === "object" && ev.data?.event === "calendly.event_scheduled") {
+            sessionStorage.setItem(key, "1");
+            setRedirecting(true);
+            setTimeout(() => router.replace("/"), 600);
+          }
+        } catch {
+          // ignore
+        }
+      };
+      window.addEventListener("message", onMsg);
+      return () => window.removeEventListener("message", onMsg);
+    }
+  }, [serviceId, router]);
 
   const productCopy = useMemo(() => {
     if (!serviceId) return null;
@@ -93,8 +121,16 @@ function SuccessInner() {
   const calendlyUrl = getCalendlyUrlFor(serviceId);
   const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "";
 
+  function handleJoinNow() {
+    if (discordInvite) {
+      try { window.open(discordInvite, "_blank"); } catch {}
+    }
+    setRedirecting(true);
+    setTimeout(() => router.replace("/"), 600);
+  }
+
   return (
-    <section className="section-padding relative">
+    <section className={`section-padding relative transition-opacity duration-300 ${redirecting ? "opacity-0" : "opacity-100"}`}>
       {/* Animated background */}
       <div className="fx-orbs" aria-hidden>
         <div className="orb orb--red" />
@@ -102,6 +138,14 @@ function SuccessInner() {
         <div className="orb orb--blue" />
       </div>
       <div className="container-max relative z-10">
+        {redirecting && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="card-surface px-6 py-4 text-center">
+              <div className="text-white font-semibold mb-2">Scheduled! Redirecting…</div>
+              <div className="mx-auto h-6 w-6 rounded-full border-2 border-gray-500 border-t-transparent animate-spin" />
+            </div>
+          </div>
+        )}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Thank you for your purchase</h1>
           <p className="text-gray-300">Your order has been confirmed{orderNumber ? ` • Order #${orderNumber}` : ""}. Next steps below →</p>
@@ -124,9 +168,9 @@ function SuccessInner() {
                   <span>Pick a date that fits your schedule. Use the same email as checkout.</span>
                 </li>
                 <li className="flex items-start gap-3 text-gray-200"><CheckCircle className="w-5 h-5 text-red-500 mt-0.5" />
-                  <span>Join our Discord to get access to coaching channels and updates{discordInvite ? (<>
-                    {" "}<a className="underline text-red-400 hover:text-red-300" href={discordInvite} target="_blank" rel="noreferrer">Join now</a>
-                  </>) : null}.</span>
+                  <span>Join our Discord to get access to coaching channels and updates{discordInvite ? (
+                    <> <button type="button" onClick={handleJoinNow} className="underline text-red-400 hover:text-red-300"> Join now</button></>
+                  ) : null}.</span>
                 </li>
               </ul>
             </div>
@@ -155,7 +199,12 @@ function SuccessInner() {
                 </div>
               </div>
             ) : (
-              <div className="card-surface p-8 text-center text-gray-300">No scheduling required for this purchase. Check your email and join Discord.</div>
+              <div className="card-surface p-8 text-center text-gray-300">
+                <div className="mb-3">No scheduling required for this purchase. Check your email and join Discord.</div>
+                {discordInvite && (
+                  <button type="button" onClick={handleJoinNow} className="valorant-button">Join Discord</button>
+                )}
+              </div>
             )}
           </div>
         </div>

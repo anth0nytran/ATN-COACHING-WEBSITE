@@ -31,10 +31,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://anthocoaching.com",
+    url: "https://atncoaching.vercel.app",
     title: "Valorant Coaching - Professional FPS Training & Rank Improvement",
     description: "Get coached by a pro Valorant player. Improve your aim, game sense, and rank with personalized coaching sessions.",
-    siteName: "Antho Valorant Coaching",
+    siteName: "ATN Coaching | Valorant Coaching",
   },
   twitter: {
     card: "summary_large_image",
