@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { readSession } from "@/lib/session";
 
 const discordBotToken = process.env.DISCORD_BOT_TOKEN;
 const guildId = process.env.DISCORD_GUILD_ID;
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const sess = await readSession();
     const discordId = sess?.discordId;

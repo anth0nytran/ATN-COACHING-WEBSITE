@@ -14,12 +14,20 @@ async function notifyOwner(content: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
+    const payload = await req.json() as {
+      payload?: {
+        invitee?: { email?: string };
+        event?: { start_time?: string };
+        event_type?: { name?: string };
+        questions_and_answers?: Array<{ question?: string; answer?: string }>;
+      };
+    };
     const inviteeEmail = payload?.payload?.invitee?.email as string | undefined;
     const startTime = payload?.payload?.event?.start_time as string | undefined;
-    const discordId = payload?.payload?.questions_and_answers?.find?.((q: any) => q.question?.toLowerCase?.().includes("discord"))?.answer as string | undefined;
+    const discordId = payload?.payload?.questions_and_answers?.find?.((q) => q?.question?.toLowerCase?.().includes("discord"))?.answer as string | undefined;
     const serviceName = payload?.payload?.event_type?.name as string | undefined;
-    const answers = (payload?.payload?.questions_and_answers as any[] | undefined)?.map?.((q) => `${q?.question}: ${q?.answer}`)?.join(" | ") || undefined;
+    const qaList = payload?.payload?.questions_and_answers || [];
+    const answers = qaList.length > 0 ? qaList.map((q) => `${q?.question}: ${q?.answer}`).join(" | ") : undefined;
     const line = `Booking scheduled\n` +
       `• Service: ${serviceName || "?"}\n` +
       `• Time: ${startTime || "(time?)"}\n` +
