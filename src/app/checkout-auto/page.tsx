@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 export default function CheckoutAutoPage() {
   const params = useSearchParams();
@@ -32,7 +33,7 @@ export default function CheckoutAutoPage() {
         setError("Failed to create checkout session");
       }
     })();
-  }, [serviceId]);
+  }, [serviceId, bypass]);
 
   return (
     <section className="section-padding">
@@ -42,7 +43,7 @@ export default function CheckoutAutoPage() {
         ) : (
           <div>
             <div className="mb-4">{error}</div>
-            <a className="valorant-button" href="/#services">Back to Services</a>
+            <Link className="valorant-button" href="/#services">Back to Services</Link>
           </div>
         )}
       </div>

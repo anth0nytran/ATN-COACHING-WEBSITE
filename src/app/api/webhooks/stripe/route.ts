@@ -35,7 +35,11 @@ export async function POST(req: NextRequest) {
     const event = stripe.webhooks.constructEvent(body, sig, secret);
 
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object as any;
+      const session = event.data.object as {
+        id: string;
+        created?: number;
+        metadata?: Record<string, string>;
+      };
       const metadata = session.metadata || {};
       const discordId = metadata.discordId as string | undefined;
       const serviceId = metadata.serviceId as string | undefined;
