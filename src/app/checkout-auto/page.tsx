@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function CheckoutAutoPage() {
+function CheckoutAutoInner() {
   const params = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const serviceId = params.get("serviceId");
@@ -29,7 +29,7 @@ export default function CheckoutAutoPage() {
         } else {
           setError((data?.error as string) || "Failed to create checkout session");
         }
-      } catch (e) {
+      } catch {
         setError("Failed to create checkout session");
       }
     })();
@@ -48,6 +48,14 @@ export default function CheckoutAutoPage() {
         )}
       </div>
     </section>
+  );
+}
+
+export default function CheckoutAutoPage() {
+  return (
+    <Suspense fallback={<section className="section-padding"><div className="container-max text-center text-white">Preparing checkout…</div></section>}>
+      <CheckoutAutoInner />
+    </Suspense>
   );
 }
 
