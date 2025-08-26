@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ArrowRight, BookOpen, Megaphone, Handshake } from "lucide-react";
@@ -26,7 +27,7 @@ export function Contact() {
             border: "1px solid rgba(148,163,184,0.18)",
           }}>
             <div className="flex items-center gap-3 text-gray-200">
-              <img src="/discord.png" alt="Discord" className="w-6 h-6" />
+              <Image src="/discord.png" alt="Discord" width={24} height={24} className="w-6 h-6" />
               <p className="text-base md:text-lg">Private channels for VOD reviews, rank help, and scrim partners.</p>
             </div>
             <Button asChild variant="valorant" size="lg">

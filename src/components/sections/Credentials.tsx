@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Users, Star, TrendingUp, Clock, BrainCircuit, GraduationCap, ChevronLeft, ChevronRight } from "lucide-react";
@@ -115,7 +116,7 @@ function ShowcaseCarousel({ items }: { items: ShowcaseItem[] }) {
           >
             <div className="card-surface overflow-hidden" style={{ aspectRatio: "16/9" }}>
               {it.type === "image" ? (
-                <img src={it.src} alt={it.alt || "credential"} className="h-full w-full object-contain" />
+                <Image src={it.src} alt={it.alt || "credential"} fill className="object-contain" sizes="(max-width: 768px) 82vw, 720px" />
               ) : it.type === "video" ? (
                 <button className="h-full w-full" onClick={() => setExpandedSrc(it.src)}>
                   <video

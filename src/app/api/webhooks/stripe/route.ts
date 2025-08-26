@@ -5,8 +5,10 @@ const discordBotToken = process.env.DISCORD_BOT_TOKEN;
 const guildId = process.env.DISCORD_GUILD_ID;
 const studentRoleId = process.env.DISCORD_STUDENT_ROLE_ID;
 const ownerChannelId = process.env.DISCORD_OWNER_CHANNEL_ID;
+const discordAutomationEnabled = ((process.env.DISCORD_AUTOMATION || "").toLowerCase() === "1" || (process.env.DISCORD_AUTOMATION || "").toLowerCase() === "true");
 
 async function assignRole(discordId: string) {
+  if (!discordAutomationEnabled) return;
   if (!discordBotToken || !guildId || !studentRoleId) return;
   await fetch(`https://discord.com/api/guilds/${guildId}/members/${discordId}/roles/${studentRoleId}`, {
     method: "PUT",
@@ -15,6 +17,7 @@ async function assignRole(discordId: string) {
 }
 
 async function notifyOwner(content: string) {
+  if (!discordAutomationEnabled) return;
   if (!discordBotToken || !ownerChannelId) return;
   await fetch(`https://discord.com/api/channels/${ownerChannelId}/messages`, {
     method: "POST",

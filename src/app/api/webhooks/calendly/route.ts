@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 const discordBotToken = process.env.DISCORD_BOT_TOKEN;
 const ownerChannelId = process.env.DISCORD_OWNER_CHANNEL_ID;
+const discordAutomationEnabled = ((process.env.DISCORD_AUTOMATION || "").toLowerCase() === "1" || (process.env.DISCORD_AUTOMATION || "").toLowerCase() === "true");
 
 async function notifyOwner(content: string) {
+  if (!discordAutomationEnabled) return;
   if (!discordBotToken || !ownerChannelId) return;
   await fetch(`https://discord.com/api/channels/${ownerChannelId}/messages`, {
     method: "POST",

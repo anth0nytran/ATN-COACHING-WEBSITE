@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Star } from "lucide-react";
 import { scrollToElement } from "@/lib/utils";
@@ -112,7 +113,7 @@ function AnimatedSocialProof() {
         rel="noopener noreferrer"
         className="group flex items-center space-x-2"
       >
-        <img src="/discord.png" alt="Discord" className="w-5 h-5" />
+        <Image src="/discord.png" alt="Discord" width={20} height={20} className="w-5 h-5" />
         <span className="group-hover:text-white transition-colors">Join our Discord</span>
       </a>
 
