@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove turbopack config to avoid the error
-}
+  experimental: {
+    outputFileTracing: true,
+  },
+  outputFileTracingIncludes: {
+    "**/*": [
+      "src/data/videos.json",
+    ],
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
