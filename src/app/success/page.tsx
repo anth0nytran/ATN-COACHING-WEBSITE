@@ -73,12 +73,22 @@ function SuccessInner() {
 
   const nonSchedulable = new Set(["vod-bundle", "duo-bundle", "mega-duo-bundle"]);
 
+  // Compile-time inlined envs; avoid dynamic process.env access on the client
+  const CALENDLY_DEFAULT = process.env.NEXT_PUBLIC_CALENDLY_URL;
+  const CALENDLY_MAP: Record<string, string | undefined> = {
+    "vod-review": process.env.NEXT_PUBLIC_CALENDLY_URL_VOD_REVIEW,
+    "intro-coaching": process.env.NEXT_PUBLIC_CALENDLY_URL_INTRO_COACHING,
+    "standard-coaching": process.env.NEXT_PUBLIC_CALENDLY_URL_STANDARD_COACHING,
+    "duo-queue": process.env.NEXT_PUBLIC_CALENDLY_URL_DUO_QUEUE,
+    "weekly-program": process.env.NEXT_PUBLIC_CALENDLY_URL_WEEKLY_PROGRAM,
+    "rank-accelerator": process.env.NEXT_PUBLIC_CALENDLY_URL_RANK_ACCELERATOR,
+    // Bundles intentionally omitted (no scheduling)
+  };
+
   function getCalendlyUrlFor(id?: string): string {
-    const env = process.env as Record<string, string | undefined>;
-    if (!id) return env.NEXT_PUBLIC_CALENDLY_URL || "";
+    if (!id) return CALENDLY_DEFAULT || "";
     if (nonSchedulable.has(id)) return ""; // bundles skip Calendly entirely
-    const key = `NEXT_PUBLIC_CALENDLY_URL_${id.replace(/[^a-z0-9]+/gi, "_").toUpperCase()}`;
-    return env[key] || env.NEXT_PUBLIC_CALENDLY_URL || "";
+    return CALENDLY_MAP[id] || CALENDLY_DEFAULT || "";
   }
   const calendlyUrl = getCalendlyUrlFor(serviceId);
   const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "";
