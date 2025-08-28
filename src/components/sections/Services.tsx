@@ -136,7 +136,7 @@ export function Services() {
           <h3 className="guide-h2">Special packs for extra value or live mentoring experiences.</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-200 md:[grid-auto-rows:1fr]">
             <div className="frame-outline p-6 h-full flex flex-col">
-              <div className="font-semibold text-white">Duo Queue Bundle</div>
+              <div className="font-semibold text-white">Duo Queue Bundle (2)</div>
               <div className="mt-1"><PriceTag id="duo-queue-bundle" /></div>
               <p className="text-gray-300 mt-2">Queue live with me. I’ll mentor you in real‑time while we play, coaching your comms, positioning, and decision‑making as it happens.</p>
               <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose Duo Queue Bundle" variant="valorant-outline" onClick={() => startCheckout("duo-queue-bundle")}>Choose Bundle</Button></div>
