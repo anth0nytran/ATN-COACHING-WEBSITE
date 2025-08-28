@@ -1,7 +1,8 @@
 "use client";
 
 import React, { Suspense, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 
 type ConfirmResponse = {
@@ -13,14 +14,10 @@ type ConfirmResponse = {
 
 function SuccessInner() {
   const params = useSearchParams();
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [ok, setOk] = useState(false);
-  const [email, setEmail] = useState<string | undefined>();
-  const [orderNumber, setOrderNumber] = useState<string | undefined>();
   const [serviceId, setServiceId] = useState<string | undefined>();
-  const [redirecting, setRedirecting] = useState(false);
-  // Simplified: no scheduling detection or membership polling
+  // Simplified: no scheduling or auto-redirects
 
   useEffect(() => {
     const id = params.get("session_id");
@@ -35,40 +32,10 @@ function SuccessInner() {
       .then((r) => r.json())
       .then((data: ConfirmResponse) => {
         setOk(Boolean(data?.ok));
-        setEmail(data?.customer?.email);
         setServiceId(data?.metadata?.serviceId || sid || undefined);
-        setOrderNumber(data?.orderNumber);
       })
       .finally(() => setLoading(false));
   }, [params]);
-
-  // No-op effects removed
-
-  // After Calendly schedules, immediately redirect to home.
-  useEffect(() => {
-    const key = `scheduled:${serviceId || "any"}`;
-    if (typeof window !== "undefined") {
-      // If they've already scheduled (e.g., after refresh), send them home
-      if (sessionStorage.getItem(key) === "1") {
-        setRedirecting(true);
-        setTimeout(() => router.replace("/"), 600);
-        return;
-      }
-      const onMsg = (ev: MessageEvent) => {
-        try {
-          if (typeof ev.data === "object" && ev.data?.event === "calendly.event_scheduled") {
-            sessionStorage.setItem(key, "1");
-            setRedirecting(true);
-            setTimeout(() => router.replace("/"), 600);
-          }
-        } catch {
-          // ignore
-        }
-      };
-      window.addEventListener("message", onMsg);
-      return () => window.removeEventListener("message", onMsg);
-    }
-  }, [serviceId, router]);
 
   const productCopy = useMemo(() => {
     if (!serviceId) return null;
@@ -99,38 +66,17 @@ function SuccessInner() {
   if (loading) return <div className="section-padding"><div className="container-max text-center text-white">Verifying payment…</div></div>;
   if (!ok) return <div className="section-padding"><div className="container-max text-center text-white">Payment not verified. If you were charged, contact support.</div></div>;
 
-  const nonSchedulable = new Set(["vod-bundle", "duo-bundle", "mega-duo-bundle"]);
-
-  // Compile-time inlined envs; avoid dynamic process.env access on the client
-  const CALENDLY_DEFAULT = process.env.NEXT_PUBLIC_CALENDLY_URL;
-  const CALENDLY_MAP: Record<string, string | undefined> = {
-    "vod-review": process.env.NEXT_PUBLIC_CALENDLY_URL_VOD_REVIEW,
-    "intro-coaching": process.env.NEXT_PUBLIC_CALENDLY_URL_INTRO_COACHING,
-    "standard-coaching": process.env.NEXT_PUBLIC_CALENDLY_URL_STANDARD_COACHING,
-    "duo-queue": process.env.NEXT_PUBLIC_CALENDLY_URL_DUO_QUEUE,
-    "weekly-program": process.env.NEXT_PUBLIC_CALENDLY_URL_WEEKLY_PROGRAM,
-    "rank-accelerator": process.env.NEXT_PUBLIC_CALENDLY_URL_RANK_ACCELERATOR,
-    // Bundles intentionally omitted (no scheduling)
-  };
-
-  function getCalendlyUrlFor(id?: string): string {
-    if (!id) return CALENDLY_DEFAULT || "";
-    if (nonSchedulable.has(id)) return ""; // bundles skip Calendly entirely
-    return CALENDLY_MAP[id] || CALENDLY_DEFAULT || "";
-  }
-  const calendlyUrl = getCalendlyUrlFor(serviceId);
+  // Calendly removed from new flow
   const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "";
 
   function handleJoinNow() {
     if (discordInvite) {
       try { window.open(discordInvite, "_blank"); } catch {}
     }
-    setRedirecting(true);
-    setTimeout(() => router.replace("/"), 600);
   }
 
   return (
-    <section className={`section-padding relative transition-opacity duration-300 ${redirecting ? "opacity-0" : "opacity-100"}`}>
+    <section className="section-padding relative">
       {/* Animated background */}
       <div className="fx-orbs" aria-hidden>
         <div className="orb orb--red" />
@@ -138,81 +84,61 @@ function SuccessInner() {
         <div className="orb orb--blue" />
       </div>
       <div className="container-max relative z-10">
-        {redirecting && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="card-surface px-6 py-4 text-center">
-              <div className="text-white font-semibold mb-2">Scheduled! Redirecting…</div>
-              <div className="mx-auto h-6 w-6 rounded-full border-2 border-gray-500 border-t-transparent animate-spin" />
-            </div>
-          </div>
-        )}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Thank you for your purchase</h1>
-          <p className="text-gray-300">Your order has been confirmed{orderNumber ? ` • Order #${orderNumber}` : ""}. Next steps below →</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Thank you for your purchase</h1>
+          <p className="text-gray-300">Your payment was received successfully. Next steps below.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start mb-10">
-          <div className="md:min-h-[760px] flex md:items-center">
-            <div>
-              {productCopy && (
-                <div className="mb-4">
-                  <div className="text-sm uppercase tracking-wide text-gray-400">You purchased</div>
-                  <div className="text-white text-2xl font-semibold">{productCopy.title}</div>
-                  <div className="text-gray-300 mt-1">{productCopy.details}</div>
-                </div>
-              )}
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Next steps</h2>
-              <p className="text-gray-300 mb-5">Schedule a session and join the Discord so we can prep resources for you.</p>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3 text-gray-200"><CheckCircle className="w-5 h-5 text-red-500 mt-0.5" />
-                  <span>Pick a date that fits your schedule. Use the same email as checkout.</span>
-                </li>
-                <li className="flex items-start gap-3 text-gray-200"><CheckCircle className="w-5 h-5 text-red-500 mt-0.5" />
-                  <span>Join our Discord to get access to coaching channels and updates{discordInvite ? (
-                    <> <button type="button" onClick={handleJoinNow} className="underline text-red-400 hover:text-red-300"> Join now</button></>
-                  ) : null}.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="relative">
-            {calendlyUrl ? (
-              <div id="schedule" className="p-0 overflow-hidden float-panel">
-                <div style={{ width: "100%", display: "grid", placeItems: "center", background: "transparent" }}>
-                  <iframe
-                    title="Calendly"
-                    src={(() => {
-                      const host = typeof window !== "undefined" ? window.location.hostname : "";
-                      const params = new URLSearchParams();
-                      params.set("hide_event_type_details", "1");
-                      params.set("hide_gdpr_banner", "1");
-                      params.set("embed_type", "Inline");
-                      if (host) params.set("embed_domain", host);
-                      params.set("background_color", "0d0f14");
-                      params.set("text_color", "e5e7eb");
-                      params.set("primary_color", "ef4444");
-                      if (email) params.set("email", email);
-                      return `${calendlyUrl}?${params.toString()}`;
-                    })()}
-                    style={{ width: "min(640px, 100%)", height: 760, border: 0, background: "transparent" }}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="card-surface p-8 text-center text-gray-300">
-                <div className="mb-3">No scheduling required for this purchase. Check your email and join Discord.</div>
-                {discordInvite && (
-                  <button type="button" onClick={handleJoinNow} className="valorant-button">Join Discord</button>
-                )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className="lg:col-span-2 card-surface p-6 md:p-8">
+            {productCopy && (
+              <div className="mb-6">
+                <div className="text-sm uppercase tracking-wide text-gray-400">You purchased</div>
+                <div className="text-white text-2xl font-semibold">{productCopy.title}</div>
+                <div className="text-gray-300 mt-1">{productCopy.details}</div>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Discord CTA moved to header; keep a simple footer link as backup */}
-        {discordInvite && (
-          <div className="text-center text-gray-400">Need help? <a className="underline" href={discordInvite} target="_blank" rel="noreferrer">Join Discord</a></div>
-        )}
+            <div className="mb-6 p-5 md:p-6 rounded-xl" style={{
+              background: "linear-gradient(90deg, rgba(239,68,68,0.16) 0%, rgba(249,115,22,0.14) 100%)",
+              border: "1px solid rgba(239,68,68,0.35)",
+              boxShadow: "0 14px 28px rgba(239,68,68,0.12)",
+            }}>
+              <div className="text-sm uppercase tracking-wide text-red-300 font-extrabold">Scheduling</div>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-white mt-1">All scheduling is done in Discord</h2>
+              <p className="text-gray-100/90 mt-2">Join the server to access the scheduling text channels. This is where you’ll pick a time, share VODs, and receive updates.</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {discordInvite && (<a className="valorant-button" href={discordInvite} target="_blank" rel="noreferrer">Join Discord</a>)}
+                <Link href="/" className="valorant-button-outline">Back to Home</Link>
+              </div>
+            </div>
+
+            <h2 className="text-xl md:text-2xl font-bold text-white mb-3">Next steps</h2>
+            <ul className="space-y-3 text-gray-200">
+              <li className="flex items-start gap-3"><CheckCircle className="w-5 h-5 text-red-500 mt-0.5" /><span>Check your email for the receipt.</span></li>
+              <li className="flex items-start gap-3"><CheckCircle className="w-5 h-5 text-red-500 mt-0.5" /><span>Join the Discord to get access to new channels and schedule your session.</span></li>
+              <li className="flex items-start gap-3"><CheckCircle className="w-5 h-5 text-red-500 mt-0.5" /><span>Having trouble? Open a support ticket in Discord with a screenshot of this page so we can fix it ASAP.</span></li>
+            </ul>
+
+            {/* Buttons removed per request; keeping primary CTA in Scheduling callout above */}
+          </div>
+
+          <aside className="card-surface p-6 md:p-8 relative">
+            <div
+              className="absolute inset-y-0 left-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-red-500 via-orange-400 to-red-500"
+              aria-hidden
+            />
+            <h3 className="text-lg font-bold text-white mb-3">Important information</h3>
+            <ul className="list-disc list-inside text-sm text-gray-300 space-y-2">
+              <li>All purchases are final; no refunds.</li>
+              <li>Missed sessions without notice may be forfeited.</li>
+              <li>Please use the same email you purchased with for any scheduling or verification.</li>
+              <li>Typical response time: within 24 hours (Mon–Sat).</li>
+              <li>If you don’t schedule ASAP, priority times are not guaranteed and may be lost.</li>
+              <li>Need help? Create a support ticket in Discord with a screenshot of the issue.</li>
+            </ul>
+          </aside>
+        </div>
       </div>
     </section>
   );

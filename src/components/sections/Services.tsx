@@ -2,206 +2,153 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Star, TrendingUp, PlayCircle, Users, Target, Rocket, Calendar, CircleHelp } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { Check } from "lucide-react";
 import Reveal from "./Reveal";
-
 import servicesData from "@/data/services.json";
 
-// Simple hover tooltip
-function InfoTooltip({ items }: { items: string[] }) {
-  return (
-    <div className="relative group inline-flex items-center">
-      <CircleHelp className="w-4 h-4 text-gray-400 group-hover:text-gray-200" />
-      <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-72 -translate-x-1/2 rounded-md border border-gray-700 bg-[#111318] p-3 text-left opacity-0 shadow-xl transition-all duration-150 group-hover:translate-y-1 group-hover:opacity-100">
-        <ul className="space-y-1.5 text-xs text-gray-200">
-          {items.map((t, i) => (
-            <li key={i} className="flex gap-2">
-              <span className="mt-[6px] h-1.5 w-1.5 rounded-full bg-red-500" />
-              <span>{t}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
+function startCheckout(serviceId: string) {
+  try {
+    const bypass = process.env.NODE_ENV !== "production" ? "?bypass=1" : "";
+    // Use existing auto checkout route to maintain current flow
+    window.location.href = `/checkout-auto?serviceId=${encodeURIComponent(serviceId)}${bypass}`;
+  } catch {
+    // noop
+  }
 }
 
-const metricsForService: Record<string, string[]> = {
-  "vod-review": ["per VOD", "individual"],
-  "intro-coaching": ["1 hr live", "individual"],
-  "standard-coaching": ["2 hr live", "individual"],
-  "duo-queue": ["per game", "duo queue"],
-  "weekly-program": ["per week", "program"],
-  "rank-accelerator": ["5–6 sessions", "bootcamp"],
-};
-
-const tooltipByService: Record<string, string[]> = {
-  "vod-review": [
-    "Get a pro’s eyes on your VOD and pinpoint the 1–2 habits quietly draining MMR",
-    "Leave with a 3‑step action plan you can run in your very next ranked game",
-    "Understand the ‘why’ behind deaths—timing, spacing, utility—not just the clip",
-    "Low‑risk way to try Valorant coaching and see fast, measurable improvement",
-  ],
-  "intro-coaching": [
-    "Live, 1‑on‑1 Valorant coaching laser‑focused on your biggest bottleneck",
-    "Pre‑aim heads with smarter crosshair placement instead of reacting late",
-    "Turn map confusion into a simple pathing plan you can follow every round",
-    "Perfect if you’re Gold–Plat and want visible wins this week, not ‘someday’",
-    "Walk away with drills tailored to your mechanics and schedule",
-  ],
-  "standard-coaching": [
-    "Two focused hours to overhaul decision‑making, micro, and clutch confidence",
-    "We’ll reveal your top ‘rank blockers’ and replace them with winning routines",
-    "Open a written improvement plan before every session so progress compounds",
-    "Built for Diamond–Immortal goals—expect clarity, not guesswork",
-    "Know exactly what to practice and how to track it between sessions",
-  ],
-  "duo-queue": [
-    "Climb while you learn—every round comes with live callouts and the ‘why’",
-    "Borrow my IGL brain for rotations, timings, and eco/clutch composure",
-    "Level‑up comms that actually win rounds (no filler chatter)",
-    "Real‑time feedback means fewer throw rounds and more closes",
-    "Best if you learn by doing and want momentum now",
-  ],
-  "weekly-program": [
-    "A 7‑day rhythm so you always know exactly what to train next",
-    "Weekly deep breakdowns + one VOD to keep you honest and improving",
-    "Custom aim + utility routines for your agent pool (no generic drills)",
-    "Accountability check‑ins so you stop guessing and start ranking up",
-    "Steady gains without burnout—designed for sustainable progress",
-  ],
-  "rank-accelerator": [
-    "5–6 duo sessions engineered for rapid rank gains—no fluff, just climb",
-    "After each match you’ll get targeted fixes to lock in improvement fast",
-    "Pressure‑proofing: mindset + drills for eco swings and clutch rounds",
-    "Build durable habits that keep you at higher elo, not a one‑week spike",
-    "Best value if Immortal+ is the goal and you want momentum immediately",
-  ],
-};
-
 export function Services() {
-  const handleBookService = async (serviceId: string) => {
-    try {
-      const hasSession = document.cookie.split(";").some((c) => c.trim().startsWith("sid="));
-      if (!hasSession) {
-        const returnTo = encodeURIComponent(`/checkout-auto?serviceId=${encodeURIComponent(serviceId)}${process.env.NODE_ENV !== "production" ? "&bypass=1" : ""}`);
-        window.location.href = `/api/auth/login?returnTo=${returnTo}`;
-        return;
-      }
-      window.location.href = `/checkout-auto?serviceId=${encodeURIComponent(serviceId)}${process.env.NODE_ENV !== "production" ? "&bypass=1" : ""}`;
-    } catch {
-      // no-op UI for now
-    }
+  const data: any = servicesData as any;
+  const priceFor = (id: string) => {
+    const item = (data.services || []).find((x: any) => x.id === id)
+      || (data.monthly || []).find((x: any) => x.id === id)
+      || (data.bundles || []).find((x: any) => x.id === id);
+    return { price: item?.price, originalPrice: item?.originalPrice } as { price?: number; originalPrice?: number };
   };
 
-  const handleJoinDiscord = () => {
-    const invite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "https://discord.com";
-    window.open(invite, "_blank");
+  const PriceTag = ({ id, suffix }: { id: string; suffix?: string }) => {
+    const { price, originalPrice } = priceFor(id);
+    return (
+      <div className="flex items-baseline gap-2">
+        {originalPrice && price && originalPrice > price ? (
+          <span className="text-gray-400 line-through text-base">${originalPrice}{suffix || ""}</span>
+        ) : null}
+        {price != null && (
+          <span className="text-red-400 font-extrabold text-xl md:text-2xl">${price}{suffix || ""}</span>
+        )}
+      </div>
+    );
   };
-
-  const iconForService = (id: string) => {
-    if (id.includes("vod")) return <PlayCircle className="w-6 h-6" style={{ color: "#60a5fa" }} />;
-    if (id.includes("duo")) return <Users className="w-6 h-6" style={{ color: "#34d399" }} />;
-    if (id.includes("weekly")) return <Calendar className="w-6 h-6" style={{ color: "#f59e0b" }} />;
-    if (id.includes("bootcamp") || id.includes("accelerator")) return <Rocket className="w-6 h-6" style={{ color: "#f472b6" }} />;
-    return <Target className="w-6 h-6" style={{ color: "#ef4444" }} />;
-  };
-
   return (
     <section id="services" className="section-padding">
       <div className="container-max">
-        <Reveal className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">Choose Your <span className="text-gradient">Coaching Path</span></h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">From quick VOD reviews to intensive bootcamps, I have a coaching option that fits your goals and budget.</p>
+        <Reveal className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">Pick Your <span className="text-gradient">Coaching Path</span></h2>
+          <p className="text-lg text-gray-300 max-w-3xl mx-auto">Streamlined options to help you improve faster—single passes for quick wins, monthly plans for momentum, and bundles for value.</p>
+          {/* Sale banner removed per request */}
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {servicesData.services.map((service, idx) => {
-            const metrics = metricsForService[service.id] || [];
-            const tips = tooltipByService[service.id] || [];
-            return (
-              <Reveal key={service.id} staggerDelayMs={idx * 60}>
-              <Card className={`card-surface ${service.popular ? "relative" : ""}`} style={service.popular ? { outline: "1px solid rgba(239,68,68,0.6)" } : undefined}>
-                {service.popular && (<div className="popular-ribbon">Most Popular</div>)}
-                <CardHeader>
-                  <div className="mb-4 inline-flex items-center justify-center w-10 h-10 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(148,163,184,0.25)" }}>{iconForService(service.id)}</div>
-                  <CardTitle className="text-2xl text-white mb-1">{service.title}</CardTitle>
-                  <CardDescription className="text-gray-300 clamp-2">{service.subtitle}</CardDescription>
-                  {(metrics.length > 0 || tips.length > 0) && (
-                    <div className="mt-3 flex items-center gap-3 text-xs text-gray-400">
-                      {metrics.length > 0 && (<span>{metrics.join(" • ")}</span>)}
-                      {tips.length > 0 && <InfoTooltip items={tips} />}
-                    </div>
-                  )}
-                </CardHeader>
-
-                <CardContent className="space-y-5">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold text-white">{formatPrice(service.price)}</span>
-                    {service.originalPrice && service.originalPrice > service.price && (<span className="text-base text-gray-400 line-through">{formatPrice(service.originalPrice)}</span>)}
-                  </div>
-                  <ul className="space-y-3">
-                    {service.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-3"><Check className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" /><span className="text-gray-300 leading-relaxed">{feature}</span></li>
-                    ))}
-                  </ul>
-                </CardContent>
-
-                <CardFooter>
-                  <Button variant="valorant" size="lg" className="w-full valorant-button" onClick={() => handleBookService(service.id)}>Book This Service</Button>
-                </CardFooter>
-              </Card>
-              </Reveal>
-            );
-          })}
-        </div>
-
-        <Reveal className="text-center mb-6">
-          <div className="limited-bar mb-6">Limited Time Bundles</div>
-          <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">Save More with <span className="text-gradient">Coaching Bundles</span></h3>
-          <p className="text-lg text-gray-300">Commit to improvement and save money with discounted packages</p>
+        {/* 1) Single Pass */}
+        <Reveal className="guide-section mb-8">
+          <div className="guide-kicker">Single Pass</div>
+          <h3 className="guide-h2">Quick, focused coaching for immediate improvement.</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 md:[grid-auto-rows:1fr]">
+            <div className="card-surface p-6 h-full flex flex-col">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="text-xl font-bold text-white">1 Live VOD Review</h4>
+                <PriceTag id="live-vod-review" />
+              </div>
+              <p className="text-gray-300 mt-2">We’ll go through one of your games together live and break down your mistakes, decision‑making, and positioning.</p>
+              <ul className="mt-3 space-y-1 text-gray-200">
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 mt-0.5 text-red-500" aria-hidden /><span>Leave with 2–3 instant improvements</span></li>
+              </ul>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Get Started - Live VOD Review" variant="valorant" onClick={() => startCheckout("live-vod-review")}>Get Started</Button></div>
+            </div>
+            <div className="card-surface p-6 h-full flex flex-col">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="text-xl font-bold text-white">Quick 1‑Hour 1:1 Session</h4>
+                <PriceTag id="quick-1h-1on1" />
+              </div>
+              <p className="text-gray-300 mt-2">One‑on‑one coaching tailored to your rank and goals. Includes a short live VOD breakdown plus feedback on gameplay, aim routine, and mindset.</p>
+              <ul className="mt-3 space-y-1 text-gray-200">
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 mt-0.5 text-red-500" aria-hidden /><span>Personalized, fast impact</span></li>
+              </ul>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Book 1:1 Session" variant="valorant" onClick={() => startCheckout("quick-1h-1on1")}>Book 1:1</Button></div>
+            </div>
+          </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          {servicesData.bundles.map((bundle, idx) => {
-            const bundleTips = tooltipByService[bundle.id] || [];
-            return (
-              <Reveal key={bundle.id} staggerDelayMs={idx * 60}>
-              <Card className="card-surface">
-                <CardHeader>
-                  <div className="mb-3 inline-flex items-center justify-center w-10 h-10 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(148,163,184,0.25)" }}>{idx % 2 === 0 ? <Rocket className="w-6 h-6" style={{ color: "#f97316" }} /> : <Users className="w-6 h-6" style={{ color: "#22d3ee" }} />}</div>
-                  <CardTitle className="text-xl text-white">{bundle.title}</CardTitle>
-                  <CardDescription className="text-gray-300 clamp-2">{bundle.subtitle}</CardDescription>
-                  {bundleTips.length > 0 && (
-                    <div className="mt-3 flex items-center gap-3 text-xs text-gray-400">
-                      <InfoTooltip items={bundleTips} />
-                    </div>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center mb-4">
-                    <div className="text-3xl font-bold text-white mb-1">{formatPrice(bundle.price)}</div>
-                    {bundle.originalPrice && bundle.originalPrice > bundle.price && (<div className="text-sm text-gray-400">Save {formatPrice(bundle.originalPrice - bundle.price)}!</div>)}
-                  </div>
-                  <p className="text-gray-300 text-sm text-center clamp-2">{bundle.description}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="valorant" size="lg" className="w-full valorant-button" onClick={() => handleBookService(bundle.id)}>Get Bundle</Button>
-                </CardFooter>
-              </Card>
-              </Reveal>
-            );
-          })}
-        </div>
+        {/* 2) Monthly Packages */}
+        <Reveal className="guide-section mb-8">
+          <div className="guide-kicker">Monthly Packages (Most Popular)</div>
+          <h3 className="guide-h2">Consistent coaching designed to help you climb every month.</h3>
+          <p className="text-gray-300 mb-4">A mix of live sessions and Pro Analysis Reports (pre‑recorded reviews with notes & improvement plans).</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:[grid-auto-rows:1fr]">
+            <div className="card-surface p-6 relative h-full flex flex-col transition-transform duration-200 hover:-translate-y-1">
+              <h4 className="text-white font-bold text-lg">Bronze / Climber</h4>
+              <div className="mt-1"><PriceTag id="monthly-bronze" suffix="/month" /></div>
+              <ul className="mt-3 space-y-2 text-gray-200 list-disc list-inside">
+                <li>1 × 1‑on‑1 live session (60 min)</li>
+                <li>1 × Pro Analysis Report (pre‑recorded VOD review + improvement plan)</li>
+                <li>Custom aim & warmup routine</li>
+                <li>Access to exclusive Discord tips & Q&A</li>
+              </ul>
+              <p className="text-gray-400 mt-3">Noticeable improvements in fundamentals, aim, and positioning without heavy time commitment.</p>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose Bronze" variant="valorant-outline" onClick={() => startCheckout("monthly-bronze")}>Choose Bronze</Button></div>
+            </div>
+            <div className="card-surface p-6 relative h-full flex flex-col transition-transform duration-200 hover:-translate-y-1 popular-flare">
+              <div className="popular-ribbon">Most Popular</div>
+              <h4 className="text-white font-bold text-lg">Silver / Rank‑Up</h4>
+              <div className="mt-1"><PriceTag id="monthly-silver" suffix="/month" /></div>
+              <ul className="mt-3 space-y-2 text-gray-200 list-disc list-inside">
+                <li>2 × 1‑on‑1 live sessions (60 min each)</li>
+                <li>2 × Pro Analysis Reports per month with timestamped notes</li>
+                <li>Agent‑specific deep dives & strategies</li>
+                <li>Optional small‑group scrims</li>
+                <li>Personalized weekly goals</li>
+              </ul>
+              <p className="text-gray-400 mt-3">Climb faster with structured live coaching plus ongoing improvement reports to keep you on track.</p>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose Silver" variant="valorant" onClick={() => startCheckout("monthly-silver")}>Choose Silver</Button></div>
+            </div>
+            <div className="card-surface p-6 relative h-full flex flex-col transition-transform duration-200 hover:-translate-y-1">
+              <h4 className="text-white font-bold text-lg">Gold / Elite</h4>
+              <div className="mt-1"><PriceTag id="monthly-gold" suffix="/month" /></div>
+              <ul className="mt-3 space-y-2 text-gray-200 list-disc list-inside">
+                <li>Weekly 1‑on‑1 live sessions</li>
+                <li>Unlimited Pro Analysis Reports</li>
+                <li>Custom agent & team strategy guides</li>
+                <li>Priority scrim & coaching access</li>
+                <li>Mindset & IGL coaching</li>
+                <li>Personalized improvement roadmap</li>
+              </ul>
+              <p className="text-gray-400 mt-3">Train like a semi‑pro with constant feedback, a tailored roadmap, and insider‑level strategies.</p>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose Gold" variant="valorant-outline" onClick={() => startCheckout("monthly-gold")}>Choose Gold</Button></div>
+            </div>
+          </div>
+        </Reveal>
 
-        <Reveal className="text-center card-surface p-8 md:p-12">
-          <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">Ready to Start Your <span className="text-gradient">Rank Journey?</span></h3>
-          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">Join our Discord community for free tips, VOD reviews, and connect with other players on the same improvement path.</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button variant="valorant" size="xl" className="valorant-button" onClick={() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })}><TrendingUp className="mr-2 w-5 h-5" />Book Your First Session</Button>
-            <Button variant="valorant-outline" size="xl" className="valorant-button-outline" onClick={handleJoinDiscord}><Star className="mr-2 w-5 h-5" />Join Discord Community</Button>
+        {/* 3) Bundles */}
+        <Reveal className="guide-section">
+          <div className="guide-kicker">Bundles</div>
+          <h3 className="guide-h2">Special packs for extra value or live mentoring experiences.</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-200 md:[grid-auto-rows:1fr]">
+            <div className="frame-outline p-6 h-full flex flex-col">
+              <div className="font-semibold text-white">Duo Queue Bundle</div>
+              <div className="mt-1"><PriceTag id="duo-queue-bundle" /></div>
+              <p className="text-gray-300 mt-2">Queue live with me. I’ll mentor you in real‑time while we play, coaching your comms, positioning, and decision‑making as it happens.</p>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose Duo Queue Bundle" variant="valorant-outline" onClick={() => startCheckout("duo-queue-bundle")}>Choose Bundle</Button></div>
+            </div>
+            <div className="frame-outline p-6 h-full flex flex-col">
+              <div className="font-semibold text-white">VOD Review Pack (5)</div>
+              <div className="mt-1"><PriceTag id="vod-pack-5" /></div>
+              <p className="text-gray-300 mt-2">5 × Pro Analysis Reports. Submit multiple games and get detailed breakdowns + improvement drills for each to track growth over time.</p>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose VOD Review Pack" variant="valorant-outline" onClick={() => startCheckout("vod-pack-5")}>Choose Pack</Button></div>
+            </div>
+            <div className="frame-outline p-6 h-full flex flex-col">
+              <div className="font-semibold text-white">IGL Series</div>
+              <div className="mt-1"><PriceTag id="igl-series" /></div>
+              <p className="text-gray-300 mt-2">2‑hour session on how to IGL your ranked teammates: calling structure, round plans, and mid‑rounding. Learn what makes a good IGL and how to lead clean executes in ranked.</p>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose IGL Series" variant="valorant-outline" onClick={() => startCheckout("igl-series")}>Choose Series</Button></div>
+            </div>
           </div>
         </Reveal>
       </div>
