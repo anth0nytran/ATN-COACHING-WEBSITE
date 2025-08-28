@@ -46,8 +46,12 @@ export async function POST(req: NextRequest) {
       .update(`${serviceId}:${sess?.discordId || "anon"}`)
       .digest("hex");
 
+    // Detect if the selected Stripe Price is recurring (subscription) or one-time
+    const stripePrice = await stripe.prices.retrieve(priceId);
+    const isRecurring = Boolean(stripePrice.recurring);
+
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: isRecurring ? "subscription" : "payment",
       payment_method_types: ["card"],
       allow_promotion_codes: true,
       line_items: [
