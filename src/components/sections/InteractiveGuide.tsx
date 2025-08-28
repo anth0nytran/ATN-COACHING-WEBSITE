@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import Link from "next/link"
 
 type ScoreRow = {
   key: string
@@ -80,9 +81,7 @@ export default function InteractiveGuide({ section = "all", variant = "inline" }
   function setScore(key: string, score: number) {
     setScores(prev => prev.map(s => (s.key === key ? { ...s, score } : s)))
   }
-  function setNotes(key: string, notes: string) {
-    setScores(prev => prev.map(s => (s.key === key ? { ...s, notes } : s)))
-  }
+  // Removed setNotes helper until a notes UI is added to avoid unused-var lint
   function togglePattern(key: string) {
     setPatterns(prev => prev.map(p => (p.key === key ? { ...p, checked: !p.checked } : p)))
   }
@@ -230,7 +229,7 @@ export default function InteractiveGuide({ section = "all", variant = "inline" }
             <h3 className="text-xl font-semibold text-white">Want a tailored plan?</h3>
             <p className="text-gray-300">Get a pro review and a step‑by‑step plan to climb faster.</p>
           </div>
-          <a href="/#services" className="valorant-button">Book a session</a>
+          <Link href="/#services" className="valorant-button">Book a session</Link>
         </div>
       </section>
     )
