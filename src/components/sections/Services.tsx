@@ -19,6 +19,51 @@ function startCheckout(serviceId: string) {
 type CatalogItem = { id: string; price?: number; originalPrice?: number };
 type Catalog = { services?: CatalogItem[]; monthly?: CatalogItem[]; bundles?: CatalogItem[] };
 
+const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+
+function formatTimeParts(ms: number): { days: number; hours: number; minutes: number; seconds: number; label: string } {
+  const safeMs = ms > 0 ? ms : 0;
+  const totalSeconds = Math.floor(safeMs / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const label = `${days > 0 ? `${days}d ` : ""}${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return { days, hours, minutes, seconds, label };
+}
+
+function usePersistentCountdown(storageKey: string, durationMs: number) {
+  const [endAt, setEndAt] = React.useState<number | null>(null);
+  const [now, setNow] = React.useState<number>(Date.now());
+
+  React.useEffect(() => {
+    const key = `countdown:${storageKey}`;
+    try {
+      const stored = typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
+      let end = stored ? parseInt(stored, 10) : NaN;
+      if (!end || Number.isNaN(end) || end < Date.now()) {
+        end = Date.now() + durationMs;
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem(key, String(end));
+        }
+      }
+      setEndAt(end);
+    } catch {
+      setEndAt(Date.now() + durationMs);
+    }
+
+    const id = typeof window !== "undefined" ? window.setInterval(() => setNow(Date.now()), 1000) : undefined;
+    return () => {
+      if (id) window.clearInterval(id);
+    };
+  }, [storageKey, durationMs]);
+
+  const timeLeftMs = endAt ? Math.max(0, endAt - now) : durationMs;
+  const parts = formatTimeParts(timeLeftMs);
+  return { timeLeftMs, hasEnded: timeLeftMs <= 0, parts, label: parts.label };
+}
+
 export function Services() {
   const data = servicesData as unknown as Catalog;
   const priceFor = (id: string): { price?: number; originalPrice?: number } => {
@@ -42,6 +87,7 @@ export function Services() {
       </div>
     );
   };
+  const iglCountdown = usePersistentCountdown("igl-series-offer-14d", FOURTEEN_DAYS_MS);
   return (
     <section id="services" className="section-padding">
       <div className="container-max">
@@ -147,11 +193,21 @@ export function Services() {
               <p className="text-gray-300 mt-2">5 × Pro Analysis Reports. Submit multiple games and get detailed breakdowns + improvement drills for each to track growth over time.</p>
               <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose VOD Review Pack" variant="valorant-outline" onClick={() => startCheckout("vod-pack-5")}>Choose Pack</Button></div>
             </div>
-            <div className="frame-outline p-6 h-full flex flex-col">
+            <div className="frame-outline p-6 h-full flex flex-col relative ring-2 ring-red-500/40 shadow-[0_0_40px_rgba(239,68,68,0.25)] bg-[radial-gradient(80%_60%_at_80%_0%,rgba(239,68,68,0.12),transparent)]">
+              <div className="absolute top-3 right-3">
+                <span className="px-2 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wide rounded bg-red-600 text-white shadow ring-1 ring-red-300/40">Limited Time</span>
+              </div>
               <div className="font-semibold text-white">IGL Series</div>
               <div className="mt-1"><PriceTag id="igl-series" /></div>
+              <div className="mt-2 text-xs md:text-sm text-red-300 font-semibold" aria-live="polite">Ends in {iglCountdown.label}</div>
               <p className="text-gray-300 mt-2">2‑hour session on how to IGL your ranked teammates: calling structure, round plans, and mid‑rounding. Learn what makes a good IGL and how to lead clean executes in ranked.</p>
-              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Choose IGL Series" variant="valorant-outline" onClick={() => startCheckout("igl-series")}>Choose Series</Button></div>
+              <ul className="mt-3 space-y-1 text-gray-200">
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 mt-0.5 text-red-500" aria-hidden /><span>Lead confident executes with clear calls</span></li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 mt-0.5 text-red-500" aria-hidden /><span>Round planning and mid‑rounding frameworks</span></li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 mt-0.5 text-red-500" aria-hidden /><span>Clutch protocols and team comms templates</span></li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 mt-0.5 text-red-500" aria-hidden /><span>Limited slots for hands‑on feedback</span></li>
+              </ul>
+              <div className="mt-4 pt-2 md:mt-auto"><Button aria-label="Claim Limited IGL Series Offer" variant="valorant" onClick={() => startCheckout("igl-series")}>Claim Limited Offer</Button></div>
             </div>
           </div>
         </Reveal>
