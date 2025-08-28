@@ -4,14 +4,22 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { scrollToElement } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const scrollToSection = (sectionId: string) => {
-    scrollToElement(sectionId);
+    if (typeof window !== "undefined" && pathname === "/") {
+      scrollToElement(sectionId);
+    } else {
+      router.push(`/#${sectionId}`);
+    }
     setIsMenuOpen(false);
   };
 
@@ -20,10 +28,10 @@ export function Header() {
       <div className="container-max">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="#" aria-label="ATN Coaching" className="flex items-center gap-2 select-none">
+          <Link href="/" aria-label="ATN Coaching" className="flex items-center gap-2 select-none">
             <span className="text-2xl font-extrabold tracking-tight leading-none text-white">ATN</span>
             <span className="text-2xl font-extrabold tracking-tight leading-none text-red-500">Coaching</span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
@@ -51,6 +59,12 @@ export function Header() {
             >
               Contact
             </button>
+            <Link
+              href="/guides"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Guides
+            </Link>
           </nav>
 
           {/* CTA Button */}
@@ -101,6 +115,13 @@ export function Header() {
               >
                 Contact
               </button>
+              <Link
+                href="/guides"
+                className="block w-full text-left text-gray-300 hover:text-white transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Guides
+              </Link>
               <div className="pt-4">
                 <Button
                   variant="valorant"

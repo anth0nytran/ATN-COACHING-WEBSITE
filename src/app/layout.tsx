@@ -67,7 +67,7 @@ export default function RootLayout({
   const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
   return (
     <html lang="en" className={`${inter.variable} ${robotoMono.variable} dark`}>
-      <body className="min-h-screen bg-gray-950 text-white antialiased">
+      <body className="min-h-screen bg-gray-950 text-white antialiased selection:bg-transparent">
         {/* Google Analytics (only if NEXT_PUBLIC_GA_ID is set) */}
         {GA_ID ? (
           <>

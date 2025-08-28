@@ -10,6 +10,14 @@
     background: linear-gradient(180deg, rgba(6,8,13,1) 0%, rgba(10,12,19,1) 40%, rgba(15,17,26,1) 100%);
     color: rgb(229 231 235);
   }
+  /* Remove focus ring on body text selection caret artifacts */
+  :focus {
+    outline: none;
+  }
+  /* Prevent contentEditable or accidental focus visuals globally */
+  [contenteditable="true"]:focus {
+    outline: none;
+  }
 }
 
 /* Hero badge */
@@ -61,6 +69,32 @@
 
   /* Gradient headline */
   .text-gradient { background: linear-gradient(90deg, #ef4444, #f97316); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+  /* Guide styles */
+  .guide-lead { font-size: 1.1rem; line-height: 1.9; color: #e5e7eb; max-width: 92ch; }
+  @media (min-width: 1024px) { .guide-lead { max-width: 110ch; } }
+  .guide-section { position: relative; padding: 1.5rem; border-radius: 0.75rem; background: rgba(17,24,39,0.55); border: 1px solid rgba(148,163,184,0.14); }
+  .guide-section::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 0.75rem 0 0 0.75rem; background: linear-gradient(180deg,#ef4444,#f97316); opacity: .85; }
+  .guide-kicker { letter-spacing: .08em; text-transform: uppercase; color: #f97316; font-weight: 800; font-size: .72rem; }
+  .guide-h2 { font-size: 1.5rem; line-height: 1.2; font-weight: 900; color: #fff; margin: .25rem 0 1rem; }
+  .guide-callout { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; border-radius: 0.75rem; padding: 1rem 1.25rem; }
+  .callout { border-radius: 0.75rem; padding: 1rem 1.25rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.35); }
+  .callout-tip { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.35); }
+  .callout-mistake { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.5); }
+  .callout-label { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: #fca5a5; font-weight: 800; margin-bottom: .35rem; }
+
+  /* Image placeholders */
+  .img-ph { position: relative; width: 100%; padding-top: 56.25%; border-radius: 0.75rem; background: radial-gradient(60% 60% at 50% 40%, rgba(239,68,68,0.15), rgba(17,24,39,0.35)); border: 1px dashed rgba(148,163,184,0.28); overflow: hidden; }
+  .img-ph-inner { position: absolute; inset: 0; display: grid; place-items: center; color: #9ca3af; font-size: .9rem; text-align: center; padding: .5rem; }
+
+  /* Article typography (blog) */
+  .article-prose p { margin: 0.4rem 0 0.75rem; font-size: 1.05rem; line-height: 1.85; color: #e5e7eb; }
+  .article-prose h3 { margin: 0.2rem 0 0.5rem; font-weight: 800; color: #fff; }
+  @media (min-width: 768px) { .article-prose p { font-size: 1.08rem; } }
+  .article-prose h2 { margin: 1.2rem 0 0.65rem; }
+  .article-prose a { color: #fca5a5; text-decoration: underline; text-underline-offset: 3px; }
+  .article-prose ul { margin: 0.25rem 0 0.75rem; }
+  .article-prose li { margin: 0.15rem 0; }
 
   /* Animated background orbs (intense) */
   .fx-orbs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
