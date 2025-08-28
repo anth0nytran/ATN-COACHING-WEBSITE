@@ -69,12 +69,6 @@ function SuccessInner() {
   // Calendly removed from new flow
   const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "";
 
-  function handleJoinNow() {
-    if (discordInvite) {
-      try { window.open(discordInvite, "_blank"); } catch {}
-    }
-  }
-
   return (
     <section className="section-padding relative">
       {/* Animated background */}

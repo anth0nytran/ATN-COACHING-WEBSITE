@@ -16,13 +16,17 @@ function startCheckout(serviceId: string) {
   }
 }
 
+type CatalogItem = { id: string; price?: number; originalPrice?: number };
+type Catalog = { services?: CatalogItem[]; monthly?: CatalogItem[]; bundles?: CatalogItem[] };
+
 export function Services() {
-  const data: any = servicesData as any;
-  const priceFor = (id: string) => {
-    const item = (data.services || []).find((x: any) => x.id === id)
-      || (data.monthly || []).find((x: any) => x.id === id)
-      || (data.bundles || []).find((x: any) => x.id === id);
-    return { price: item?.price, originalPrice: item?.originalPrice } as { price?: number; originalPrice?: number };
+  const data = servicesData as unknown as Catalog;
+  const priceFor = (id: string): { price?: number; originalPrice?: number } => {
+    const inServices = (data.services ?? []).find((x) => x.id === id);
+    const inMonthly = (data.monthly ?? []).find((x) => x.id === id);
+    const inBundles = (data.bundles ?? []).find((x) => x.id === id);
+    const item = inServices ?? inMonthly ?? inBundles;
+    return { price: item?.price, originalPrice: item?.originalPrice };
   };
 
   const PriceTag = ({ id, suffix }: { id: string; suffix?: string }) => {
