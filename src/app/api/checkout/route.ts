@@ -41,14 +41,17 @@ export async function POST(req: NextRequest) {
     if (!priceId) return NextResponse.json({ error: "Unknown serviceId" }, { status: 400 });
 
     const sess = await readSession();
-    const idKey = crypto
-      .createHash("sha256")
-      .update(`${serviceId}:${sess?.discordId || "anon"}`)
-      .digest("hex");
 
     // Detect if the selected Stripe Price is recurring (subscription) or one-time
     const stripePrice = await stripe.prices.retrieve(priceId);
     const isRecurring = Boolean(stripePrice.recurring);
+
+    // Build an idempotency key that changes across modes to avoid Stripe conflicts when
+    // we switch from payment -> subscription (or vice versa) for the same user/service.
+    const idKey = crypto
+      .createHash("sha256")
+      .update(`${serviceId}:${isRecurring ? "sub" : "pay"}:${sess?.discordId || "anon"}`)
+      .digest("hex");
 
     const session = await stripe.checkout.sessions.create({
       mode: isRecurring ? "subscription" : "payment",
