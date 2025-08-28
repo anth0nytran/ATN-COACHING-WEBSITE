@@ -1,9 +1,10 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
-import { Input } from "@/components/ui/input"
+// import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 type ScoreRow = {
   key: string
@@ -130,7 +131,9 @@ export default function InteractiveGuide({ section = "all", variant = "inline" }
               <div className="mt-1 text-sm text-gray-300">Average: {avgScore ?? "—"}</div>
               {avgRank ? (
                 <div className="mt-2 flex flex-col items-center gap-2">
-                  <img src={avgRank.src} alt={avgRank.label} className="h-14 w-auto object-contain" />
+                  <div className="relative h-14 w-14">
+                    <Image src={avgRank.src} alt={avgRank.label} fill className="object-contain" sizes="56px" />
+                  </div>
                   <div className="text-white font-semibold text-[13px] leading-none">{avgRank.label}</div>
                 </div>
               ) : (

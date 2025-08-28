@@ -5,7 +5,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.NEXT_PUBLIC_BASE_URL || "https://atncoaching.vercel.app";
   const now = new Date().toISOString();
 
-  const staticPages = [
+  const staticPages: MetadataRoute.Sitemap = [
     "",
   ].map((p) => ({
     url: `${base}/${p}`.replace(/\/+$/g, "/").replace(/\/#/, "#"),
@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const blogIndex: Array<{
     url: string;
     lastModified: string | Date;
-    changeFrequency: "weekly" | "monthly" | "always" | "hourly" | "daily" | "yearly" | "never";
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
     priority: number;
   }> = [{
     url: `${base}/guides`,
@@ -29,7 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const blogPosts = getAllPosts().map((post) => ({
     url: `${base}/guide/${post.slug}`,
     lastModified: new Date(post.date).toISOString(),
-    changeFrequency: "monthly",
+    changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
@@ -39,13 +39,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...blogIndex.map((e) => ({
       url: e.url,
       lastModified: e.lastModified,
-      changeFrequency: e.changeFrequency as any,
+      changeFrequency: e.changeFrequency,
       priority: e.priority,
     })),
     ...blogPosts.map((e) => ({
       url: e.url,
       lastModified: e.lastModified,
-      changeFrequency: e.changeFrequency as any,
+      changeFrequency: e.changeFrequency,
       priority: e.priority,
     })),
   ]

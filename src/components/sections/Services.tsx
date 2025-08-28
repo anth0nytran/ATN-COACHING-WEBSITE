@@ -91,7 +91,7 @@ export function Services() {
         return;
       }
       window.location.href = `/checkout-auto?serviceId=${encodeURIComponent(serviceId)}${process.env.NODE_ENV !== "production" ? "&bypass=1" : ""}`;
-    } catch (e) {
+    } catch {
       // no-op UI for now
     }
   };

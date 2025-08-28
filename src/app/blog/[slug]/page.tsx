@@ -271,7 +271,7 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
                 <p className="text-gray-300">Get a pro review and a step‑by‑step plan to climb faster.</p>
               </div>
               <div className="flex gap-3">
-                <a href="/#services" className="valorant-button">Book a session</a>
+                <Link href="/#services" className="valorant-button">Book a session</Link>
                 <Link href="/guides" className="valorant-button-outline">Back to all guides</Link>
               </div>
             </div>
