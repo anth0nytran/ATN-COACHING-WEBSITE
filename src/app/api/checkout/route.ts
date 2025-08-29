@@ -46,11 +46,24 @@ export async function POST(req: NextRequest) {
     const stripePrice = await stripe.prices.retrieve(priceId);
     const isRecurring = Boolean(stripePrice.recurring);
 
-    // Build an idempotency key that changes across modes to avoid Stripe conflicts when
-    // we switch from payment -> subscription (or vice versa) for the same user/service.
+    // Build an idempotency key that includes all variable parameters to ensure uniqueness
+    // This prevents conflicts when the same user tries to checkout with different details
+    const idempotencyData = [
+      serviceId,
+      isRecurring ? "sub" : "pay",
+      sess?.discordId || "anon",
+      email || "no-email",
+      name || "no-name",
+      utm?.utm_source || "no-source",
+      utm?.utm_medium || "no-medium",
+      utm?.utm_campaign || "no-campaign",
+      utm?.utm_term || "no-term",
+      utm?.utm_content || "no-content"
+    ].join(":");
+    
     const idKey = crypto
       .createHash("sha256")
-      .update(`${serviceId}:${isRecurring ? "sub" : "pay"}:${sess?.discordId || "anon"}`)
+      .update(idempotencyData)
       .digest("hex");
 
     const session = await stripe.checkout.sessions.create({
