@@ -6,6 +6,27 @@ import Link from "next/link";
 import { getStoredLead, getStoredUtm, logEvent, saveLeadLocally } from "@/lib/analytics";
 import servicesData from "@/data/services.json";
 
+type ServiceItem = {
+  id: string;
+  title: string;
+  price?: number;
+  originalPrice?: number;
+  subtitle?: string;
+  type?: string;
+  popular?: boolean;
+  features?: string[];
+  description?: string;
+  stripeProductId?: string;
+  stripePriceId?: string;
+  services?: string[];
+};
+
+type ServicesData = {
+  services: ServiceItem[];
+  monthly: ServiceItem[];
+  bundles: ServiceItem[];
+};
+
 function CheckoutAutoInner() {
   const params = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -43,8 +64,8 @@ function CheckoutAutoInner() {
   }, []);
 
   const offer = useMemo(() => {
-    const all = servicesData as any;
-    const find = (arr?: any[]) => (arr || []).find((x) => x.id === serviceId);
+    const all = servicesData as ServicesData;
+    const find = (arr?: ServiceItem[]) => (arr || []).find((x) => x.id === serviceId);
     return find(all.services) || find(all.monthly) || find(all.bundles) || null;
   }, [serviceId]);
 
