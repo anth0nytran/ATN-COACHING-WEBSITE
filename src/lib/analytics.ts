@@ -93,7 +93,11 @@ export function logEvent(eventName: string, params?: AnalyticsParams): void {
 
   try {
     if (typeof vercelTrack === "function") {
-      vercelTrack(eventName, withUtm as Record<string, string | number | boolean | undefined>);
+      // Filter out undefined values and ensure all values are valid for Vercel Analytics
+      const vercelParams = Object.fromEntries(
+        Object.entries(withUtm).filter(([_, value]) => value !== undefined)
+      ) as Record<string, string | number | boolean>;
+      vercelTrack(eventName, vercelParams);
     }
   } catch {
     // ignore
