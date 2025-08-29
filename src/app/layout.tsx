@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import StickyDiscordCTA from "@/components/sections/StickyDiscordCTA";
 import "./globals.css";
 
 const inter = Inter({
@@ -87,6 +88,8 @@ export default function RootLayout({
         ) : null}
 
         {children}
+        {/* Sticky Discord CTA */}
+        <StickyDiscordCTA />
         {/* Vercel Analytics */}
         <Analytics />
       </body>

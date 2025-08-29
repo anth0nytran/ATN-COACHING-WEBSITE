@@ -3,8 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, Star } from "lucide-react";
-import { scrollToElement } from "@/lib/utils";
+import { ArrowRight, Star, ShieldCheck } from "lucide-react";
 
 export function Hero() {
   return (
@@ -26,38 +25,46 @@ export function Hero() {
         </div>
 
         {/* Main Headline */}
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-          Stuck in <span className="text-gradient">Elo Hell?</span>
-          <br />
-          Get Out With <span className="text-gradient">Proven</span> Coaching
-        </h1>
+        <div className="mx-auto max-w-4xl">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+            Fix your <span className="text-gradient">3 biggest mistakes</span>
+            <br />
+            in your next match.
+          </h1>
+        </div>
 
         {/* Subheadline */}
         <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
           Stop wasting hours grinding. Learn from an experienced radiant player with <span className="text-red-400 font-semibold"> 10,000+ FPS hours</span> and real results coaching players from any rank.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+        {/* Single CTA + Guarantee */}
+        <div className="flex flex-col items-center justify-center gap-4 mb-12">
           <Button
             variant="valorant"
             size="xl"
-            onClick={() => scrollToElement("services")}
+            onClick={() => {
+              try { window.location.href = "/checkout-auto?serviceId=live-vod-review"; } catch {}
+            }}
             className="group valorant-button"
+            aria-label="Book a VOD Review"
           >
-            Book Your Session
+            Book a VOD Review
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>
-          
-          <Button
-            variant="valorant-outline"
-            size="xl"
-            onClick={() => scrollToElement("credentials")}
-            className="valorant-button-outline"
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm md:text-base"
+            style={{
+              background: "linear-gradient(90deg, rgba(239,68,68,0.12) 0%, rgba(249,115,22,0.10) 100%)",
+              border: "1px solid rgba(239,68,68,0.35)",
+              boxShadow: "0 8px 24px rgba(239,68,68,0.20)",
+            }}
+            aria-label="Satisfaction guarantee"
           >
-            <Play className="mr-2 w-5 h-5" />
-            See My Credentials
-          </Button>
+            <ShieldCheck className="w-4 h-4 text-red-400" />
+            <span className="text-red-200 font-bold">Guarantee:</span>
+            <span className="text-gray-100/90">If you don’t leave with 2–3 fixes, I’ll extend your coaching time free.</span>
+          </div>
         </div>
 
         {/* Social Proof */}
