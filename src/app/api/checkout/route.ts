@@ -15,7 +15,7 @@ const checkoutBypass = (process.env.CHECKOUT_BYPASS || "").toLowerCase() === "1"
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { serviceId, email, name, bypass } = body as { serviceId?: string; email?: string; name?: string; bypass?: boolean | string | number };
+    const { serviceId, email, name, bypass, utm } = body as { serviceId?: string; email?: string; name?: string; bypass?: boolean | string | number; utm?: Record<string, string | undefined> };
     if (!serviceId) return NextResponse.json({ error: "Missing serviceId" }, { status: 400 });
 
     const bypassParam = req.nextUrl.searchParams.get("bypass");
@@ -70,9 +70,14 @@ export async function POST(req: NextRequest) {
         discordId: sess?.discordId || "",
         username: sess?.username || "",
         calendlyUrl: getCalendlyUrlFor(serviceId) || "",
+        utm_source: (utm?.utm_source as string) || "",
+        utm_medium: (utm?.utm_medium as string) || "",
+        utm_campaign: (utm?.utm_campaign as string) || "",
+        utm_term: (utm?.utm_term as string) || "",
+        utm_content: (utm?.utm_content as string) || "",
       },
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/#services`,
+      cancel_url: `${baseUrl}/?canceled=1#services`,
     }, { idempotencyKey: idKey });
 
     return NextResponse.json({ url: session.url });

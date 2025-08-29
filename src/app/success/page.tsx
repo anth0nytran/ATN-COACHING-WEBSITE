@@ -4,6 +4,7 @@ import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
+import { logEvent } from "@/lib/analytics";
 
 type ConfirmResponse = {
   ok: boolean;
@@ -36,6 +37,13 @@ function SuccessInner() {
       })
       .finally(() => setLoading(false));
   }, [params]);
+
+  // Fire a purchase event once verification succeeds
+  useEffect(() => {
+    if (ok && serviceId) {
+      try { logEvent("purchase", { serviceId }); } catch {}
+    }
+  }, [ok, serviceId]);
 
   const productCopy = useMemo(() => {
     if (!serviceId) return null;

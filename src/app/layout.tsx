@@ -3,6 +3,7 @@ import { Inter, Roboto_Mono } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import StickyDiscordCTA from "@/components/sections/StickyDiscordCTA";
+import { saveUtmFromUrlIfPresent } from "@/lib/analytics";
 import "./globals.css";
 
 const inter = Inter({
@@ -66,6 +67,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+  // Capture and persist UTM parameters if present on first load
+  if (typeof window !== "undefined") {
+    try { saveUtmFromUrlIfPresent(); } catch {}
+  }
   return (
     <html lang="en" className={`${inter.variable} ${robotoMono.variable} dark`}>
       <body className="min-h-screen bg-gray-950 text-white antialiased selection:bg-transparent">

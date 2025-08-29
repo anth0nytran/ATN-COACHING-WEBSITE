@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import Reveal from "./Reveal";
 import servicesData from "@/data/services.json";
+import { logEvent } from "@/lib/analytics";
 
 function startCheckout(serviceId: string) {
   try {
+    // Track CTA clicks before starting the checkout flow
+    logEvent("cta_click", { serviceId });
     const bypass = process.env.NODE_ENV !== "production" ? "?bypass=1" : "";
     // Use existing auto checkout route to maintain current flow
     window.location.href = `/checkout-auto?serviceId=${encodeURIComponent(serviceId)}${bypass}`;
@@ -88,6 +91,22 @@ export function Services() {
     );
   };
   const iglCountdown = usePersistentCountdown("igl-series-offer-14d", FOURTEEN_DAYS_MS);
+  // Detect canceled checkouts when users return from Stripe and track the event once
+  React.useEffect(() => {
+    try {
+      if (typeof window === "undefined") return;
+      const url = new URL(window.location.href);
+      const canceled = url.searchParams.get("canceled");
+      if (canceled === "1") {
+        logEvent("checkout_cancel");
+        // Remove the flag so the event doesn't fire again on refresh
+        url.searchParams.delete("canceled");
+        window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+      }
+    } catch {
+      // noop
+    }
+  }, []);
   return (
     <section id="services" className="section-padding">
       <div className="container-max">
